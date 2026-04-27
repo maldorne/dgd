@@ -1,7 +1,7 @@
 /*
  * This file is part of DGD, https://github.com/dworkin/dgd
  * Copyright (C) 1993-2010 Dworkin B.V.
- * Copyright (C) 2010-2022 DGD Authors (see the commit log for details)
+ * Copyright (C) 2010-2025 DGD Authors (see the commit log for details)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@
 # include "str.h"
 # include "array.h"
 # include "object.h"
+# include "xfloat.h"
 # include "data.h"
 # include "interpret.h"
 # include "asn.h"
@@ -977,6 +978,10 @@ void Asi::power(Asi &a, Asi &b, Asi &mod, Asi &t)
 	/* q = mod >> j */
 	q.copy(mod);
 	q.rshift((size << 5) + i);
+	q.size -= size;
+	if (q.num[q.size - 1] == 0) {
+	    q.size--;
+	}
 
 	/* size = number of words, i = mask */
 	if (i != 0) {
