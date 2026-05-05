@@ -32,7 +32,7 @@ ifeq ($(HOST),GENERIC_SYSV)
 endif
 
 SRC=	local.cpp dirent.cpp dload.cpp time.cpp connect.cpp
-OBJ=	local.o dirent.o dload.o time.o connect.o crypt.o asn.o
+OBJ=	local.o dirent.o dload.o time.o connect.o proxy.o crypt.o asn.o
 ifdef SIMFLOAT
   OBJ+=simfloat.o
 else
@@ -79,6 +79,7 @@ connect.cpp: unix/connect.cpp
 
 $(OBJ):	../dgd.h ../host.h ../config.h ../alloc.h ../error.h
 connect.o: ../hash.h ../comm.h
+proxy.o: proxy.h
 simfloat.o hostfloat.o crypt.o asn.o: ../xfloat.h
 hostfloat.o: ../ext.h
 crypt.o asn.o: ../str.h ../array.h ../object.h ../hash.h ../swap.h

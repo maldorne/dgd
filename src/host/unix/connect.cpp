@@ -29,6 +29,9 @@
 # include "dgd.h"
 # include "hash.h"
 # include "comm.h"
+# ifdef SUPPORT_PROXY_PROTOCOL
+#  include "proxy.h"
+# endif
 
 # ifdef INET6		/* INET6 defined */
 #  if INET6 == 0
@@ -1300,6 +1303,20 @@ XConnection *XConnection::create6(int portfd, int port)
 	addr.addr6 = sin6.sin6_addr;
 	addr.ipv6 = TRUE;
     }
+# ifdef SUPPORT_PROXY_PROTOCOL
+    {
+	ProxyAddr p;
+	if (proxyParseV1(fd, &p)) {
+	    if (p.family == AF_INET) {
+		addr.addr = p.v4;
+		addr.ipv6 = FALSE;
+	    } else {
+		addr.addr6 = p.v6;
+		addr.ipv6 = TRUE;
+	    }
+	}
+    }
+# endif
     conn->addr = IpAddr::create(&addr);
     conn->at = port;
     FD_SET(fd, &infds);
@@ -1343,6 +1360,15 @@ XConnection *XConnection::create(int portfd, int port)
     conn->udpbuf = (char *) NULL;
     addr.addr = sin.sin_addr;
     addr.ipv6 = FALSE;
+# ifdef SUPPORT_PROXY_PROTOCOL
+    {
+	ProxyAddr p;
+	if (proxyParseV1(fd, &p) && p.family == AF_INET) {
+	    addr.addr = p.v4;
+	}
+	/* TCP6 over an IPv4 listener cannot be represented here; ignore */
+    }
+# endif
     conn->addr = IpAddr::create(&addr);
     conn->at = port;
     FD_SET(fd, &infds);

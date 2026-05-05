@@ -41,20 +41,48 @@ This distribution is organized as follows:
 -   src/host  
     Subdirectories for various platform-dependent files.
 
-### Added for the Maldorne fork
+### Maldorne fork
 
-- Build the container image (from project base directory)
+This fork tracks upstream DGD closely and adds three small build flags.
+Each is gated by `#ifdef`, so when the corresponding macro is *not*
+defined the driver behaves exactly like upstream — keeping the source
+tree trivially mergeable with `dworkin/dgd`.
 
-  `docker build --no-cache . -t ghcr.io/maldorne/dgd:latest`
+All three flags are enabled by default in `src/Makefile` (so a plain
+`make` produces the same binary as the published container image). To
+build vanilla DGD, override with `make DEFINES=""`:
 
-- Run the container and take a look inside using a terminal
+- **`-DSLASHSLASH`** — also documented upstream. Allows `//` line
+  comments in LPC.
+- **`-DPRESERVE_DEFAULTS_ON_RESTORE`** — when set, `restore_object()`
+  leaves variables that are *not* mentioned in the `.o` save file at
+  whatever value the object currently holds, instead of zeroing them.
+  This matters when a savefile is older than the LPC source and a new
+  variable was added: with this flag the new variable keeps the default
+  assigned by the object's `create()` instead of becoming `0` / `0.0` /
+  `nil`. Touches `src/kfun/file.cpp`.
+- **`-DSUPPORT_PROXY_PROTOCOL`** — parse the [HAProxy PROXY protocol
+  v1](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt)
+  header on accepted TCP connections, so the driver sees the real client
+  IP when running behind a TCP reverse proxy (Traefik, HAProxy, ...).
+  Backwards compatible: connections without the header continue to work
+  unchanged. Implemented in `src/host/proxy.{h,cpp}` and called from
+  `src/host/unix/connect.cpp`.
 
-  `docker run --rm -ti ghcr.io/maldorne/dgd:latest /bin/bash`
+#### Container image
 
-  Inside the container, in `/opt/mud`, you can find the directories `driver` 
-  (with the source code of DGD) and `bin`, with the binaries needed
-  to use DGD.
+The published image is `ghcr.io/maldorne/dgd:latest`. Builds and pushes
+are automated by GitHub Actions on every push to `master`; manual
+`docker push` is not part of the workflow.
 
-- Publish the container to Github Container Registry
+To build locally for development or debugging:
 
-  `docker push ghcr.io/maldorne/dgd:latest`
+```sh
+docker build --no-cache . -t ghcr.io/maldorne/dgd:latest
+docker run --rm -ti ghcr.io/maldorne/dgd:latest /bin/bash
+```
+
+Inside the container, `/opt/mud/bin/dgd` is the compiled driver. The
+source tree is removed from the final image; comment out the cleanup
+`RUN rm -Rf /opt/mud/driver` line in the `Dockerfile` if you need to
+inspect the build environment.

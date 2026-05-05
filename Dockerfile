@@ -21,6 +21,9 @@ WORKDIR /opt/mud
 COPY --chown=mud:mud . /opt/mud/driver/
 
 WORKDIR /opt/mud/driver/src
+# The Maldorne fork enables SLASHSLASH, PRESERVE_DEFAULTS_ON_RESTORE and
+# SUPPORT_PROXY_PROTOCOL by default in src/Makefile. See README.md
+# ("Maldorne fork") for what each flag does.
 RUN make clean
 RUN make
 RUN make install

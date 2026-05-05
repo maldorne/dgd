@@ -39,7 +39,11 @@ ifndef HOST
   $(error HOST is undefined)
 endif
 
-DEFINES=	-DSLASHSLASH	# -DLARGENUM  -DNOFLOAT -DCLOSURES
+# Maldorne fork: SLASHSLASH, PRESERVE_DEFAULTS_ON_RESTORE and
+# SUPPORT_PROXY_PROTOCOL are enabled by default so that a plain `make`
+# produces the same binary as the published container image. See
+# README.md ("Maldorne fork") for the meaning of each flag.
+DEFINES=	-DSLASHSLASH -DPRESERVE_DEFAULTS_ON_RESTORE -DSUPPORT_PROXY_PROTOCOL	# -DLARGENUM -DNOFLOAT -DCLOSURES
 DEBUG=	-g -DDEBUG
 CCFLAGS=-D$(HOST) $(DEFINES) $(DEBUG)
 CXXFLAGS=-I. -Icomp -Ilex -Ied -Iparser -Ikfun $(CCFLAGS)
