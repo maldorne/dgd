@@ -31,6 +31,15 @@ RUN make install
 # let's copy the binary to the same directory as other images
 RUN cp -R /opt/mud/driver/bin/ /opt/mud/
 
+# Build only the sprintf kfun extension (we do not use the others
+# bundled in dgd-extensions). The Hexagon mudlib relies on this kfun
+# being loadable from /opt/mud/extensions/sprintf.1.5; the path is
+# referenced by config.hexagon's `modules =` block.
+WORKDIR /opt/mud/driver/dgd-extensions/src
+RUN make sprintf
+RUN mkdir -p /opt/mud/extensions \
+ && cp /opt/mud/driver/dgd-extensions/sprintf.1.5 /opt/mud/extensions/
+
 # remove the code from the image after compiling
 # comment this line if you want to check something about the build process
 RUN rm -Rf /opt/mud/driver
