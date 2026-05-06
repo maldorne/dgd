@@ -4,4 +4,4 @@
 
 [submodule "dgd-extensions"]
 	path = dgd-extensions
-	url = git@github.com:maldorne/dgd-extensions.git
+	url = https://github.com/maldorne/dgd-extensions.git
